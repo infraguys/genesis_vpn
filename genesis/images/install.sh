@@ -54,7 +54,6 @@ cp ta.key pki/dh.pem pki/ca.crt "pki/issued/$SERVER_NAME.crt" "pki/private/$SERV
 cat $EL_PATH/etc/sysctl.conf >> /etc/sysctl.conf
 
 cp "$EL_PATH/etc/openvpn/$SERVER_NAME.conf" "/etc/openvpn/"
-mkdir /var/log/openvpn/
 
 systemctl enable "openvpn@$SERVER_NAME"
 
