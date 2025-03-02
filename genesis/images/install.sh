@@ -24,7 +24,7 @@ set -o pipefail
 
 SERVER_NAME=server
 
-EL_PATH="/opt/genesis_element_vpn"
+EL_PATH="/opt/genesis_vpn"
 
 SYSTEMD_SERVICE_DIR=/etc/systemd/system/
 

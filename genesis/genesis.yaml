@@ -4,16 +4,16 @@ build:
   # Dependencies of the project
   deps:
       # Target path in the image
-    - dst: /opt/genesis_element_vpn
+    - dst: /opt/genesis_vpn
       # Local path
       path:
-        src: ../../genesis_element_vpn
+        src: ../../genesis_vpn
 
   # List of elements in the project
   elements:
     # List of images in the element
     - images:
-      - name: genesis-element-vpn
+      - name: genesis-vpn
         format: raw
 
         # OS profile for the image
