@@ -44,6 +44,7 @@ if [ ! -f "/etc/openvpn/easy-rsa/pki/issued/$2.crt" ]; then
     exit
 fi
 
+CONFIGS_DIR="/etc/openvpn/easy-rsa/configs/"
 CA=$(cat "/etc/openvpn/ca.crt")
 KEY=$(cat "/etc/openvpn/easy-rsa/pki/private/$2.key")
 CERT=$(cat "/etc/openvpn/easy-rsa/pki/issued/$2.crt")
@@ -53,9 +54,7 @@ read -r -d '' TEMPLATE <<EOF
 client
 
 dev tun
-proto udp
-
-remote ${1} 1194
+remote ${1} 1194 udp
 nobind
 
 persist-key
@@ -63,24 +62,29 @@ persist-tun
 
 verb 3
 
-ca [inline]
+ping 10
+ping-restart 60
+
+key-direction 1
+reneg-sec 0
+
 <ca>
 ${CA}
 </ca>
-cert [inline]
 <cert>
 ${CERT}
 </cert>
-key [inline]
 <key>
 ${KEY}
 </key>
-tls-auth [inline] 1
 <tls-auth>
 ${TLS_AUTH}
 </tls-auth>
 EOF
 
-echo "$TEMPLATE" >"client_$2.conf"
+mkdir -p "$CONFIGS_DIR"
 
-echo "Client created, see file client_$2.conf"
+echo "$TEMPLATE" >"${CONFIGS_DIR}$2.ovpn"
+
+echo "=============================="
+echo "Done, give ${CONFIGS_DIR}$2.ovpn to client"
