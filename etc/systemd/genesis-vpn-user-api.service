@@ -1,0 +1,14 @@
+[Unit]
+Description=Genesis VPN User API
+After=network-online.target
+
+[Service]
+TimeoutStopSec=5
+Restart=on-failure
+RestartSec=5s
+KillSignal=SIGINT
+ExecStartPre=/bin/sleep 2
+ExecStart=genesis-vpn-user-api --config-file /etc/genesis_vpn/genesis_vpn.conf
+
+[Install]
+WantedBy=multi-user.target
