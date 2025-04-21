@@ -1,0 +1,29 @@
+client
+
+dev tun
+remote {{server_address}} {{server_port}} {{server_protocol}}
+nobind
+
+persist-key
+persist-tun
+
+verb 3
+
+ping 10
+ping-restart 60
+
+key-direction 1
+reneg-sec 0
+
+<ca>
+{{ca}}
+</ca>
+<cert>
+{{cert}}
+</cert>
+<key>
+{{key}}
+</key>
+<tls-auth>
+{{tls_auth}}
+</tls-auth>

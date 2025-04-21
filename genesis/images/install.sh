@@ -24,9 +24,60 @@ set -o pipefail
 
 SERVER_NAME=server
 
-EL_PATH="/opt/genesis_vpn"
+GC_PATH="/opt/genesis_vpn"
+GC_CFG_DIR=/etc/genesis_vpn
+VENV_PATH="$GC_PATH/.venv"
+
+GC_PG_USER="genesis_vpn"
+GC_PG_PASS="pass"
+GC_PG_DB="genesis_vpn"
 
 SYSTEMD_SERVICE_DIR=/etc/systemd/system/
+
+apt update
+apt install -y \
+    postgresql \
+    libev-dev \
+    python3.12-venv \
+    python3-dev
+
+# Default creds for genesis notification services
+sudo -u postgres psql -c "CREATE ROLE $GC_PG_USER WITH LOGIN PASSWORD '$GC_PG_PASS';"
+sudo -u postgres psql -c "CREATE DATABASE $GC_PG_USER OWNER $GC_PG_DB;"
+
+# Install service
+mkdir -p $GC_CFG_DIR
+cp "$GC_PATH/etc/genesis_vpn/genesis_vpn.conf" $GC_CFG_DIR/
+cp "$GC_PATH/etc/genesis_vpn/logging.yaml" $GC_CFG_DIR/
+cp "$GC_PATH/etc/genesis_vpn/client_config.j2" $GC_CFG_DIR/
+
+mkdir -p "$VENV_PATH"
+python3 -m venv "$VENV_PATH"
+source "$GC_PATH"/.venv/bin/activate
+pip install pip --upgrade
+pip install -r "$GC_PATH"/requirements.txt
+pip install -e "$GC_PATH"
+
+# Apply migrations
+ra-apply-migration --config-dir "$GC_CFG_DIR/" --path "$GC_PATH/migrations"
+deactivate
+
+# Create links to venv
+ln -sf "$VENV_PATH/bin/genesis-vpn-user-api" "/usr/bin/genesis-vpn-user-api"
+ln -sf "$VENV_PATH/bin/genesis-vpn-server-agent" "/usr/bin/genesis-vpn-server-agent"
+ln -sf "$VENV_PATH/bin/genesis-vpn-import-certs" "/usr/bin/genesis-vpn-import-certs"
+ln -sf "$VENV_PATH/bin/genesis-vpn-cli" "/usr/bin/genesis-vpn-cli"
+
+# Install Systemd service files
+cp "$GC_PATH/etc/systemd/genesis-vpn-user-api.service" $SYSTEMD_SERVICE_DIR
+cp "$GC_PATH/etc/systemd/genesis-vpn-server-agent.service" $SYSTEMD_SERVICE_DIR
+
+# Enable genesis notification services
+systemctl enable \
+    genesis-vpn-user-api \
+    genesis-vpn-server-agent
+
+# TODO: move next part into `bootstrap`
 
 # For silent non-interactive mode
 export EASYRSA_BATCH=1
@@ -51,13 +102,13 @@ openvpn --genkey --secret ta.key
 cp ta.key pki/dh.pem pki/ca.crt "pki/issued/$SERVER_NAME.crt" "pki/private/$SERVER_NAME.key" /etc/openvpn/
 
 
-cat $EL_PATH/etc/sysctl.conf >> /etc/sysctl.conf
+cat $GC_PATH/etc/sysctl.conf >> /etc/sysctl.conf
 
-cp "$EL_PATH/etc/openvpn/$SERVER_NAME.conf" "/etc/openvpn/"
+cp "$GC_PATH/etc/openvpn/$SERVER_NAME.conf" "/etc/openvpn/"
 
 systemctl enable "openvpn@$SERVER_NAME"
 
 
 mkdir /etc/openvpn/ccd/
 
-# To create client config, use add_new_client.sh
+# To create client config, use genesis-vpn-cli
