@@ -58,4 +58,6 @@ cp "$EL_PATH/etc/openvpn/$SERVER_NAME.conf" "/etc/openvpn/"
 systemctl enable "openvpn@$SERVER_NAME"
 
 
+mkdir /etc/openvpn/ccd/
+
 # To create client config, use add_new_client.sh
