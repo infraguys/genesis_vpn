@@ -26,6 +26,7 @@ from restalchemy.api import constants
 from restalchemy.api import field_permissions as field_p
 from restalchemy.api import packers
 from restalchemy.api import resources
+from restalchemy.dm import filters as dm_filters
 
 from genesis_vpn.common import constants as c
 from genesis_vpn.common import ovpn_config
@@ -98,7 +99,11 @@ class AddressesPerUserController(
     __policy_name__ = "certificates"
 
     def filter(self, filters):
-        certs = models.Certificate.objects.get_all()
+        self._enforce("read")
+        filt = {}
+        if "user_id" in filters:
+            filt = {"user_id": dm_filters.EQ(filters["user_id"])}
+        certs = models.Certificate.objects.get_all(filters=filt)
         res = collections.defaultdict(list)
         subnets = []
         for subnet in CONF[c.COMMON_DOMAIN].server_subnets:
