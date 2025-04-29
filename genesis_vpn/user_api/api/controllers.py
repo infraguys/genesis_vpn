@@ -14,8 +14,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import collections
 import urllib.parse
 
+import netaddr
+from oslo_config import cfg
 from gcl_iam import controllers as iam_controllers
 from restalchemy.api import actions
 from restalchemy.api import controllers as ra_controllers
@@ -24,9 +27,13 @@ from restalchemy.api import field_permissions as field_p
 from restalchemy.api import packers
 from restalchemy.api import resources
 
+from genesis_vpn.common import constants as c
 from genesis_vpn.common import ovpn_config
 from genesis_vpn.dm import models
 from genesis_vpn.user_api.api import versions
+
+
+CONF = cfg.CONF
 
 
 class RootController(ra_controllers.Controller):
@@ -80,3 +87,24 @@ class CertificateController(
             200,
             headers,
         )
+
+
+class AddressesPerUserController(
+    iam_controllers.PolicyBasedWithoutProjectController
+):
+    """Controller for /addresses_per_user/ endpoint"""
+
+    __policy_service_name__ = "vpn"
+    __policy_name__ = "certificates"
+
+    def filter(self, filters):
+        certs = models.Certificate.objects.get_all()
+        res = collections.defaultdict(list)
+        subnets = []
+        for subnet in CONF[c.COMMON_DOMAIN].server_subnets:
+            subnets.append(netaddr.IPNetwork(subnet).network)
+        for cert in certs:
+            for subnet in subnets:
+                res[cert.user_id].append(str(subnet + cert.address_offset))
+
+        return res
