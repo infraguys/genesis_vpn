@@ -46,7 +46,7 @@ class CertificateController(
     iam_controllers.PolicyBasedWithoutProjectController,
     ra_controllers.BaseResourceControllerPaginated,
 ):
-    __policy_service_name__ = "genesis_vpn"
+    __policy_service_name__ = "vpn"
     __policy_name__ = "certificates"
 
     __packer__ = packers.MultipartPacker
@@ -66,7 +66,7 @@ class CertificateController(
 
     @actions.get
     def get_ovpn_config(self, resource):
-
+        self._enforce("*:read:ovpn_config")
         headers = {
             "Content-Type": constants.CONTENT_TYPE_OCTET_STREAM,
             "Content-Disposition": 'attachment; filename="%s"'
