@@ -103,6 +103,12 @@ service_config_opts = [
         default=["server"],
         help="List of reserved common names for server certificates",
     ),
+    cfg.ListOpt(
+        "server-subnets",
+        required=True,
+        help="List of subnets that the openvpn servers will use. "
+        "Used for API info only.",
+    ),
 ]
 
 

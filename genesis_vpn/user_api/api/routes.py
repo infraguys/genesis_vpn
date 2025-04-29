@@ -30,6 +30,11 @@ class CertificateRoute(routes.Route):
     get_ovpn_config = routes.action(CertificateActions)
 
 
+class AddressesPerUserRoute(routes.Route):
+    __allow_methods__ = [routes.FILTER]
+    __controller__ = controllers.AddressesPerUserController
+
+
 class ApiEndpointRoute(routes.Route):
     """Handler for /v1.0/ endpoint"""
 
@@ -37,3 +42,4 @@ class ApiEndpointRoute(routes.Route):
     __allow_methods__ = [routes.FILTER]
 
     certificates = routes.route(CertificateRoute)
+    addresses_per_user = routes.route(AddressesPerUserRoute)
