@@ -69,7 +69,7 @@ class MigrationStep(migrations.AbstarctMigrationStep):
             """,
             """
             CREATE TABLE "certificates" (
-                "uuid" CHAR(36) PRIMARY KEY,
+                "uuid" UUID PRIMARY KEY,
                 "name" VARCHAR(36),
                 "common_name" VARCHAR(256) NOT NULL UNIQUE,
                 "status" certificates_status NOT NULL DEFAULT 'ACTIVE',
