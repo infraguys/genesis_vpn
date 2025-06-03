@@ -40,7 +40,7 @@ CONF = cfg.CONF
 class RootController(ra_controllers.Controller):
     """Controller for / endpoint"""
 
-    def filter(self, filters):
+    def filter(self, filters, order_by=None):
         return (versions.API_VERSION_1_0,)
 
 
@@ -98,7 +98,7 @@ class AddressesPerUserController(
     __policy_service_name__ = "vpn"
     __policy_name__ = "certificates"
 
-    def filter(self, filters):
+    def filter(self, filters, order_by=None):
         self._enforce("read")
         filt = {}
         if "user_id" in filters:
